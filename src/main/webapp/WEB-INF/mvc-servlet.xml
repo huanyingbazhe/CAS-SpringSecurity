@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security=""
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-3.2.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+       
+       <http use-expressions="true">
+        <intercept-url pattern="/**" access="isAuthenticated()" />
+ 
+        <http-basic />
+    </http>
+ 
+    <authentication-manager>
+        <authentication-provider>
+            <user-service>
+                <user name="user1" password="user1Pass" authorities="ROLE_USER" />
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+
+<context:component-scan base-package="org.goja" />
+
+ <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+  <beans:property name="prefix" value="/WEB-INF/views/" />
+  <beans:property name="suffix" value=".jsp" />
+ </beans:bean>
+ 
+ <beans:bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
+    <beans:property name="service" value="https://raoul-tomcat/focus/go"/>
+    <beans:property name="sendRenew" value="false"/>
+  </beans:bean>
+  
+  <security:http entry-point-ref="casEntryPoint">
+   ...
+     <security:custom-filter position="CAS_FILTER" ref="casFilter" />
+  </security:http>
+  
+  <beans:bean id="casFilter" class="org.springframework.security.cas.web.CasAuthenticationFilter">
+    <beans:property name="authenticationManager" ref="authenticationManager"/>
+  </beans:bean>
+
+  <beans:bean id="casEntryPoint" class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+    <beans:property name="loginUrl" value="https://raoul-tomcat/cas/login"/>
+    <beans:property name="serviceProperties" ref="serviceProperties"/>
+  </beans:bean>
+
+</beans:beans>
